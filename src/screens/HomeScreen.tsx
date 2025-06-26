@@ -10,7 +10,7 @@ import {
 import { signOut, User } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
-import { getWalletInfo } from '../api/walletApi';
+import { getWalletInfo, mintTokens, burnTokens } from '../api/walletApi';
 
 // Only fetch and display wallet info when the user presses the button
 
@@ -22,6 +22,8 @@ export default function HomeScreen({ user }: Props) {
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [minting, setMinting] = useState(false);
+  const [burning, setBurning] = useState(false);
 
   // Fetch user profile on mount
   useEffect(() => {
@@ -59,6 +61,34 @@ export default function HomeScreen({ user }: Props) {
     }
   };
 
+  const handleMint = async () => {
+    if (!walletAddress) return;
+    setMinting(true);
+    setError(null);
+    try {
+      await mintTokens(user.uid, 100); // Mint 100 tokens
+      await fetchWalletInfo();
+    } catch (err) {
+      setError('Failed to mint tokens.');
+    } finally {
+      setMinting(false);
+    }
+  };
+
+  const handleBurn = async () => {
+    if (!walletAddress) return;
+    setBurning(true);
+    setError(null);
+    try {
+      await burnTokens(user.uid, 100); // Burn 100 tokens
+      await fetchWalletInfo();
+    } catch (err) {
+      setError('Failed to burn tokens.');
+    } finally {
+      setBurning(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-100 px-4 pt-8">
       <View className="bg-white rounded-2xl p-6 w-11/12 max-w-md self-center shadow-card mb-6">
@@ -89,9 +119,29 @@ export default function HomeScreen({ user }: Props) {
         </TouchableOpacity>
         {error && <Text className="text-red-500 text-center">{error}</Text>}
         {walletAddress && (
-          <Text className="text-xs text-center break-all">
-            Address: {walletAddress}
-          </Text>
+          <>
+            <Text className="text-xs text-center break-all">
+              Address: {walletAddress}
+            </Text>
+            <TouchableOpacity
+              onPress={handleMint}
+              className="bg-green-500 rounded-full py-2 my-2"
+              disabled={minting}
+            >
+              <Text className="text-white text-center font-semibold">
+                {minting ? 'Minting...' : 'Mint 100 Tokens'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleBurn}
+              className="bg-yellow-500 rounded-full py-2 mb-2"
+              disabled={burning}
+            >
+              <Text className="text-white text-center font-semibold">
+                {burning ? 'Burning...' : 'Burn 100 Tokens'}
+              </Text>
+            </TouchableOpacity>
+          </>
         )}
         {balance !== null && (
           <Text className="text-base text-center">Balance: {balance}</Text>

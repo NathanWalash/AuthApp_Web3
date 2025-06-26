@@ -5,6 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import admin from 'firebase-admin';
 import walletApiRouter from './api/wallet-api';
+import tokenRouter from './api/token';
 
 // Initialize Firebase Admin
 admin.initializeApp({
@@ -18,6 +19,7 @@ app.use(express.json());
 
 // Mount wallet API
 app.use('/api/wallet-api', walletApiRouter);
+app.use('/api/token', tokenRouter);
 
 // Root route
 app.get('/', (req, res) => {
