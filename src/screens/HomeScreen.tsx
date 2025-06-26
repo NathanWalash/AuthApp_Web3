@@ -11,6 +11,7 @@ import { signOut, User } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
 import AccountSettingsScreen from './AccountSettingsScreen';
+import { getWalletInfo } from '../api/walletApi';
 
 interface Profile {
   firstName: string;
@@ -25,6 +26,9 @@ export default function HomeScreen({ user }: Props) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [wallet, setWallet] = useState<{ address: string; balance: number } | null>(null);
+  const [walletLoading, setWalletLoading] = useState(false);
+  const [walletError, setWalletError] = useState<string | null>(null);
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -33,6 +37,19 @@ export default function HomeScreen({ user }: Props) {
       if (snap.exists()) setProfile(snap.data() as Profile);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWallet = async () => {
+    setWalletLoading(true);
+    setWalletError(null);
+    try {
+      const info = await getWalletInfo(user.uid);
+      setWallet(info);
+    } catch (err) {
+      setWalletError('Wallet not ready yet. Please try again.');
+    } finally {
+      setWalletLoading(false);
     }
   };
 
@@ -72,6 +89,28 @@ export default function HomeScreen({ user }: Props) {
         <Text className="text-base text-gray-600 text-center">
           Email: {profile?.email}
         </Text>
+        {/* Wallet Info */}
+        <View style={{ marginTop: 24 }}>
+          <Text className="text-lg font-semibold text-center mb-2">Wallet Info</Text>
+          <TouchableOpacity
+            onPress={fetchWallet}
+            className="bg-brand-500 rounded-full py-2 mb-3"
+            disabled={walletLoading}
+          >
+            <Text className="text-white text-center font-semibold">
+              {walletLoading ? 'Loading...' : 'Get Wallet Info'}
+            </Text>
+          </TouchableOpacity>
+          {walletError && (
+            <Text className="text-red-500 text-center">{walletError}</Text>
+          )}
+          {wallet && (
+            <>
+              <Text className="text-xs text-center break-all">Address: {wallet.address}</Text>
+              <Text className="text-base text-center">Balance: {wallet.balance}</Text>
+            </>
+          )}
+        </View>
       </View>
 
       <TouchableOpacity
