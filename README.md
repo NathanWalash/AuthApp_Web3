@@ -1,8 +1,89 @@
 # AuthApp_Web3
 
-## Monorepo Structure (Frontend + Backend)
+## Project Overview
 
-This project is organized as a monorepo containing both the React Native (Expo) frontend and a Node.js/Express backend for secure wallet management.
+This project is a full-stack Web3 authentication and wallet onboarding app, built with React Native (Expo) for the frontend and Node.js/Express for the backend. It enables users to sign up, receive a secure Ethereum wallet, and view their wallet address and token balance.
+
+---
+
+## User Flow
+
+- **Signup:**
+  - User signs up with name, email, date of birth, and password.
+  - A Firebase Auth user and Firestore user document are created.
+  - The backend provisions an Ethereum wallet and stores the encrypted private key in Firestore.
+  - The wallet address is also written to the user's Firestore document.
+
+- **Login:**
+  - User logs in with email and password.
+  - The Home screen fetches and displays the user's profile info (name, email, DOB) from Firestore.
+  - The wallet address and balance are fetched and displayed only when the user presses the "Get Wallet Info" button.
+
+---
+
+## Frontend Structure
+
+- **HomeScreen:**
+  - Fetches and displays user profile info on mount.
+  - Fetches and displays wallet address and balance on demand (button press).
+- **SignupScreen:**
+  - Handles user registration and triggers wallet provisioning via the backend.
+- **LoginScreen:**
+  - Handles user authentication.
+
+---
+
+## Backend Structure
+
+- **/backend/src/api/wallet-api/provisionWallet.ts**
+  - Provisions a new Ethereum wallet for a user.
+  - Stores the encrypted private key in Firestore.
+  - Updates the user's Firestore document with the wallet address.
+- **/backend/src/api/wallet-api/walletInfo.ts**
+  - Returns the wallet address and token balance for a user.
+
+---
+
+## Backend Environment Setup
+
+1. In the `backend/` folder, create a `.env` file with the following content:
+   ```env
+   GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
+   ENCRYPTION_SECRET=your-strong-32-char-secret-here
+   FIREBASE_PROJECT_ID=your-firebase-project-id
+   ```
+   - `GOOGLE_APPLICATION_CREDENTIALS` should point to your Firebase service account JSON file.
+   - `ENCRYPTION_SECRET` must be a strong, random 32-character string (required for AES-256 encryption).
+   - `FIREBASE_PROJECT_ID` is your Firebase project ID.
+2. **Never commit your `.env` or `serviceAccountKey.json` to git!**
+
+---
+
+## Running the Project
+
+### Backend
+1. `cd backend`
+2. `npm install`
+3. `npm run dev` (for development)
+
+### Frontend
+1. `npm install`
+2. `npx expo start`
+
+#### Troubleshooting: Backend URL
+- If you are testing from a physical device or emulator, you may need to change the `BACKEND_URL` in `src/api/walletApi.ts` to your computer's local IP address (e.g., `http://192.168.1.42:4000/api/wallet-api`).
+- `localhost` will only work if running the app in a web browser on the same machine as the backend.
+
+---
+
+## Notes
+- The wallet address is only fetched and displayed when the user requests it, ensuring up-to-date info and avoiding race conditions.
+- All sensitive wallet operations are handled server-side; the private key is never exposed to the frontend.
+- User profile and wallet info are stored in Firestore for easy access and management.
+
+---
+
+For more details, see the code in `/src/screens` (frontend) and `/backend/src/api/wallet-api` (backend).
 
 ```
 AuthApp_Web3/

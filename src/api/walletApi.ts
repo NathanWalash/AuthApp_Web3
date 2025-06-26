@@ -1,43 +1,26 @@
 const BACKEND_URL = "http://192.168.0.188:4000/api/wallet-api"; // Change to your backend URL in production
 
+/**
+ * Provisions a wallet for the given user UID by calling the backend API.
+ * Returns an object with the wallet address (e.g., { address: string }).
+ * Throws an error if the backend call fails.
+ */
 export async function provisionWallet(uid: string) {
-  console.log('Calling backend to provision wallet for:', uid, 'at', `${BACKEND_URL}/provision-wallet`);
-  try {
-    const res = await fetch(`${BACKEND_URL}/provision-wallet`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uid }),
-    });
-    console.log('Provision wallet response status:', res.status);
-    if (!res.ok) {
-      const text = await res.text();
-      console.log('Backend error:', text);
-      throw new Error("Failed to provision wallet");
-    }
-    const data = await res.json();
-    console.log('Provision wallet success:', data);
-    return data;
-  } catch (e) {
-    console.log('Fetch error in provisionWallet:', e);
-    throw e;
-  }
+  const res = await fetch(`${BACKEND_URL}/provision-wallet`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uid }),
+  });
+  if (!res.ok) throw new Error("Failed to provision wallet");
+  return res.json();
 }
 
+/**
+ * Fetches wallet info (address and balance) for the given user UID from the backend API.
+ * Throws an error if the backend call fails.
+ */
 export async function getWalletInfo(uid: string) {
-  console.log('Calling backend to get wallet info for:', uid, 'at', `${BACKEND_URL}/wallet-info?uid=${uid}`);
-  try {
-    const res = await fetch(`${BACKEND_URL}/wallet-info?uid=${uid}`);
-    console.log('Get wallet info response status:', res.status);
-    if (!res.ok) {
-      const text = await res.text();
-      console.log('Backend error:', text);
-      throw new Error("Failed to fetch wallet info");
-    }
-    const data = await res.json();
-    console.log('Get wallet info success:', data);
-    return data;
-  } catch (e) {
-    console.log('Fetch error in getWalletInfo:', e);
-    throw e;
-  }
+  const res = await fetch(`${BACKEND_URL}/wallet-info?uid=${uid}`);
+  if (!res.ok) throw new Error("Failed to fetch wallet info");
+  return res.json();
 } 

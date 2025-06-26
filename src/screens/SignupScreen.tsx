@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { auth, db } from '../firebase/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { provisionWallet, getWalletInfo } from '../api/walletApi';
 
 type Props = { onLogin: () => void };
@@ -52,20 +52,16 @@ export default function SignupScreen({ onLogin }: Props) {
         createdAt: Date.now(),
       });
       // Provision wallet after signup
+      // ---
+      // After creating the Firebase user, provision a wallet for the user.
+      // Fetch the user document once after wallet provisioning to ensure walletAddress is present.
+      // ---
       try {
         await provisionWallet(cred.user.uid);
-        // Wait for wallet info to be available (retry up to 5 times)
-        let wallet = null;
-        for (let i = 0; i < 5; i++) {
-          try {
-            wallet = await getWalletInfo(cred.user.uid);
-            break;
-          } catch (e) {
-            await new Promise(res => setTimeout(res, 1000)); // Wait 1s before retry
-          }
-        }
-        if (!wallet) {
-          setError('Wallet created, but failed to fetch wallet info. Please try again.');
+        // Fetch the user profile once after wallet provisioning
+        const snap = await getDoc(doc(db, 'users', cred.user.uid));
+        if (!snap.exists() || !snap.data().walletAddress) {
+          setError('Wallet provisioned, but address not found. Please try again.');
           return;
         }
         onLogin();

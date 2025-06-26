@@ -31,6 +31,7 @@ export default function LoginScreen({
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
+      // No need to set wallet address in context; it will be fetched from Firestore in HomeScreen
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -94,7 +95,7 @@ export default function LoginScreen({
           </TouchableOpacity>
           <TouchableOpacity onPress={onCreateAccount}>
             <Text className="text-sm text-brand-500 text-center">
-              Don’t have an account? Sign Up
+              Don't have an account? Sign Up
             </Text>
           </TouchableOpacity>
         </View>

@@ -23,6 +23,13 @@ router.post('/provision-wallet', async (req, res) => {
     // Store in Firestore
     await storeWalletInFirestore(uid, address, encryptedPrivateKey);
 
+    // Also update the user's Firestore document with the wallet address
+    const admin = require('firebase-admin');
+    await admin.firestore().collection('users').doc(uid).set(
+      { walletAddress: address },
+      { merge: true }
+    );
+
     return res.status(201).json({ address });
   } catch (error) {
     console.error('Provision wallet error:', error);
