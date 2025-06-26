@@ -1,3 +1,22 @@
+# AuthApp_Web3
+
+## Monorepo Structure (Frontend + Backend)
+
+This project is organized as a monorepo containing both the React Native (Expo) frontend and a Node.js/Express backend for secure wallet management.
+
+```
+AuthApp_Web3/
+  ├── backend/      # Node.js/Express backend (API, wallet provisioning, Firestore)
+  ├── src/          # React Native frontend (screens, firebase config, etc.)
+  ├── App.tsx       # Frontend entry point
+  └── ...etc
+```
+
+- **Frontend**: Handles user interface, authentication, and calls backend APIs.
+- **Backend**: Handles secure wallet creation, private key encryption/storage, and blockchain operations. Never exposes private keys to the frontend.
+
+---
+
 # AuthApp
 
 A React Native Expo application that implements persistent email/password authentication with Firebase and user profiles stored in Cloud Firestore. Provides a Login/Signup flow, password reset, and account settings screens.
